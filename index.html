@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>dom-to-pptx 演示</title>
+
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- dom-to-pptx CDN bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/dom-to-pptx@1.1.5/dist/dom-to-pptx.bundle.js"></script>
+
+    <style>
+      /* Page background */
+      body {
+        background: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #1e1b4b 100%);
+        min-height: 100vh;
+        font-family: 'Inter', system-ui, sans-serif;
+      }
+
+      /* Slide container: 1000×562 (16:9) as recommended by the library */
+      #slide-container {
+        width: 1000px;
+        height: 562px;
+        position: relative;
+        overflow: hidden;
+        background: #fff;
+      }
+
+      /* Chart bar hover effect */
+      .bar-item:hover .bar-fill {
+        filter: brightness(1.15);
+      }
+
+      /* Subtle export button glow */
+      #export-btn {
+        box-shadow: 0 0 20px rgba(99, 102, 241, 0.5);
+        transition: all 0.2s ease;
+      }
+      #export-btn:hover {
+        box-shadow: 0 0 35px rgba(99, 102, 241, 0.9);
+        transform: translateY(-1px);
+      }
+      #export-btn:active {
+        transform: translateY(0);
+      }
+      #export-btn:disabled {
+        opacity: 0.65;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+      }
+
+      /* Spinner */
+      .spinner {
+        display: inline-block;
+        width: 18px;
+        height: 18px;
+        border: 2px solid rgba(255,255,255,0.4);
+        border-top-color: #fff;
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+        vertical-align: middle;
+        margin-right: 6px;
+      }
+      @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+  </head>
+
+  <body class="flex flex-col items-center justify-center min-h-screen p-8 gap-8">
+
+    <!-- Page header -->
+    <div class="text-center">
+      <h1 class="text-3xl font-bold text-white mb-1">dom-to-pptx 演示</h1>
+      <p class="text-indigo-300 text-sm">点击下方按钮，将下面的 HTML 幻灯片导出为可编辑的 PowerPoint 文件</p>
+    </div>
+
+    <!-- ─────────────────────────────────────────────
+         SLIDE CONTAINER  (1000 × 562, 16:9)
+    ───────────────────────────────────────────── -->
+    <div id="slide-container" class="rounded-2xl shadow-2xl flex">
+
+      <!-- ░░ LEFT SIDEBAR ░░ -->
+      <div class="w-80 flex-shrink-0 relative overflow-hidden flex flex-col p-10 justify-between"
+           style="background: linear-gradient(160deg, #0f172a 0%, #1e1b4b 100%);">
+
+        <!-- Decorative blobs -->
+        <div class="absolute -top-16 -left-16 w-56 h-56 rounded-full opacity-30 pointer-events-none"
+             style="background: radial-gradient(circle, #7c3aed, transparent 70%);"></div>
+        <div class="absolute -bottom-16 -right-8 w-64 h-64 rounded-full opacity-25 pointer-events-none"
+             style="background: radial-gradient(circle, #4f46e5, transparent 70%);"></div>
+
+        <!-- Top badge + heading -->
+        <div class="relative z-10">
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full mb-5"
+               style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12);">
+            <span class="w-2 h-2 rounded-full" style="background:#4ade80;"></span>
+            <span class="text-xs font-semibold tracking-widest" style="color:#cbd5e1;">LIVE DATA</span>
+          </div>
+
+          <h2 class="text-4xl font-extrabold leading-tight mb-3" style="color:#f1f5f9;">
+            季度<br />
+            <span style="background: linear-gradient(90deg,#818cf8,#67e8f9); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">业绩报告</span>
+          </h2>
+          <p class="text-sm leading-relaxed" style="color:#94a3b8;">
+            高保真 DOM 转换技术，助力演示文稿工作流效率提升。
+          </p>
+        </div>
+
+        <!-- Feature list -->
+        <div class="relative z-10 flex flex-col gap-3">
+          <div class="flex items-center gap-3 p-3 rounded-xl"
+               style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.07);">
+            <div class="w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm flex-shrink-0"
+                 style="background:rgba(99,102,241,0.2); color:#a5b4fc;">1</div>
+            <span class="text-sm" style="color:#cbd5e1;">像素级阴影还原</span>
+          </div>
+          <div class="flex items-center gap-3 p-3 rounded-xl"
+               style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.07);">
+            <div class="w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm flex-shrink-0"
+                 style="background:rgba(139,92,246,0.2); color:#c4b5fd;">2</div>
+            <span class="text-sm" style="color:#cbd5e1;">渐变色完美转换</span>
+          </div>
+          <div class="flex items-center gap-3 p-3 rounded-xl"
+               style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.07);">
+            <div class="w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm flex-shrink-0"
+                 style="background:rgba(6,182,212,0.2); color:#67e8f9;">3</div>
+            <span class="text-sm" style="color:#cbd5e1;">自动字体嵌入</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ░░ RIGHT CONTENT ░░ -->
+      <div class="flex-1 p-10 flex flex-col" style="background:#f8fafc;">
+
+        <!-- Top row: title + metric cards -->
+        <div class="flex items-start justify-between mb-6">
+          <div>
+            <h3 class="text-xl font-bold" style="color:#1e293b;">收入构成分析</h3>
+            <p class="text-sm" style="color:#64748b;">2024 财年</p>
+          </div>
+
+          <!-- KPI Cards -->
+          <div class="flex gap-4">
+            <div class="px-5 py-3 rounded-xl text-center"
+                 style="background:linear-gradient(135deg,#6366f1,#4f46e5); box-shadow:0 4px 14px rgba(99,102,241,0.4);">
+              <p class="text-xs font-semibold mb-0.5" style="color:rgba(255,255,255,0.75);">总收入</p>
+              <p class="text-2xl font-extrabold" style="color:#fff;">¥8.4M</p>
+              <p class="text-xs mt-0.5" style="color:rgba(255,255,255,0.6);">↑ 23% YoY</p>
+            </div>
+            <div class="px-5 py-3 rounded-xl text-center"
+                 style="background:linear-gradient(135deg,#10b981,#059669); box-shadow:0 4px 14px rgba(16,185,129,0.4);">
+              <p class="text-xs font-semibold mb-0.5" style="color:rgba(255,255,255,0.75);">净利润</p>
+              <p class="text-2xl font-extrabold" style="color:#fff;">¥2.1M</p>
+              <p class="text-xs mt-0.5" style="color:rgba(255,255,255,0.6);">↑ 18% YoY</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bar chart -->
+        <div class="flex-1 flex flex-col justify-end gap-3">
+          <!-- Q1 -->
+          <div class="bar-item flex items-center gap-3">
+            <span class="w-6 text-xs font-bold text-right flex-shrink-0" style="color:#475569;">Q1</span>
+            <div class="flex-1 h-8 rounded-lg overflow-hidden" style="background:#e2e8f0;">
+              <div class="bar-fill h-full rounded-lg flex items-center px-3"
+                   style="width:55%; background:linear-gradient(90deg,#6366f1,#818cf8); transition:width 0.6s;">
+                <span class="text-xs font-bold text-white">¥1.8M</span>
+              </div>
+            </div>
+          </div>
+          <!-- Q2 -->
+          <div class="bar-item flex items-center gap-3">
+            <span class="w-6 text-xs font-bold text-right flex-shrink-0" style="color:#475569;">Q2</span>
+            <div class="flex-1 h-8 rounded-lg overflow-hidden" style="background:#e2e8f0;">
+              <div class="bar-fill h-full rounded-lg flex items-center px-3"
+                   style="width:70%; background:linear-gradient(90deg,#8b5cf6,#a78bfa); transition:width 0.6s;">
+                <span class="text-xs font-bold text-white">¥2.3M</span>
+              </div>
+            </div>
+          </div>
+          <!-- Q3 -->
+          <div class="bar-item flex items-center gap-3">
+            <span class="w-6 text-xs font-bold text-right flex-shrink-0" style="color:#475569;">Q3</span>
+            <div class="flex-1 h-8 rounded-lg overflow-hidden" style="background:#e2e8f0;">
+              <div class="bar-fill h-full rounded-lg flex items-center px-3"
+                   style="width:63%; background:linear-gradient(90deg,#06b6d4,#67e8f9); transition:width 0.6s;">
+                <span class="text-xs font-bold" style="color:#0e7490;">¥2.1M</span>
+              </div>
+            </div>
+          </div>
+          <!-- Q4 -->
+          <div class="bar-item flex items-center gap-3">
+            <span class="w-6 text-xs font-bold text-right flex-shrink-0" style="color:#475569;">Q4</span>
+            <div class="flex-1 h-8 rounded-lg overflow-hidden" style="background:#e2e8f0;">
+              <div class="bar-fill h-full rounded-lg flex items-center px-3"
+                   style="width:86%; background:linear-gradient(90deg,#10b981,#34d399); transition:width 0.6s;">
+                <span class="text-xs font-bold text-white">¥2.8M</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Footer note -->
+        <p class="text-xs mt-4" style="color:#94a3b8;">
+          ✦ 数据来源：内部财务系统 &nbsp;|&nbsp; 本报告由 <strong>dom-to-pptx</strong> 自动生成
+        </p>
+      </div>
+    </div>
+    <!-- ── end slide container ── -->
+
+    <!-- Export button -->
+    <button id="export-btn"
+            class="px-8 py-4 rounded-full text-white font-bold text-lg tracking-wide"
+            style="background: linear-gradient(135deg, #6366f1, #4f46e5);">
+      ⬇ 导出为 PowerPoint (.pptx)
+    </button>
+
+    <!-- Usage hint -->
+    <p class="text-indigo-400 text-xs text-center opacity-70">
+      生成的 .pptx 文件可在 Microsoft PowerPoint / WPS / LibreOffice 中直接编辑
+    </p>
+
+    <script>
+      const btn = document.getElementById('export-btn');
+
+      btn.addEventListener('click', async () => {
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner"></span>正在生成 PPTX…';
+
+        try {
+          await domToPptx.exportToPptx('#slide-container', {
+            fileName: 'dom-to-pptx-demo.pptx',
+          });
+          btn.innerHTML = '✅ 导出成功！文件已下载';
+          setTimeout(() => {
+            btn.disabled = false;
+            btn.innerHTML = '⬇ 导出为 PowerPoint (.pptx)';
+          }, 3000);
+        } catch (err) {
+          console.error(err);
+          btn.innerHTML = '❌ 导出失败，请查看控制台';
+          btn.disabled = false;
+        }
+      });
+    </script>
+  </body>
+</html>
