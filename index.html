@@ -33,6 +33,17 @@
         filter: brightness(1.15);
       }
 
+      /* Upload area */
+      #upload-area {
+        border: 2px dashed rgba(99, 102, 241, 0.5);
+        transition: border-color 0.2s, background 0.2s;
+      }
+      #upload-area:hover, #upload-area.dragover {
+        border-color: #818cf8;
+        background: rgba(99, 102, 241, 0.08);
+      }
+      #upload-input { display: none; }
+
       /* Subtle export button glow */
       #export-btn {
         box-shadow: 0 0 20px rgba(99, 102, 241, 0.5);
@@ -73,7 +84,23 @@
     <!-- Page header -->
     <div class="text-center">
       <h1 class="text-3xl font-bold text-white mb-1">dom-to-pptx 演示</h1>
-      <p class="text-indigo-300 text-sm">点击下方按钮，将下面的 HTML 幻灯片导出为可编辑的 PowerPoint 文件</p>
+      <p class="text-indigo-300 text-sm">上传自定义 HTML 文件，或使用内置示例，然后导出为可编辑的 PowerPoint 文件</p>
+    </div>
+
+    <!-- Upload area -->
+    <div id="upload-area"
+         class="flex flex-col items-center justify-center gap-3 px-10 py-6 rounded-2xl cursor-pointer"
+         style="background: rgba(255,255,255,0.04);"
+         onclick="document.getElementById('upload-input').click()">
+      <input id="upload-input" type="file" accept=".html,.htm,text/html" />
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+      </svg>
+      <div class="text-center">
+        <p class="text-sm font-semibold text-indigo-200">点击或拖拽上传 HTML 文件</p>
+        <p class="text-xs text-indigo-400 mt-0.5">仅支持 .html 文件 · 内容将替换下方幻灯片预览</p>
+      </div>
+      <span id="upload-filename" class="text-xs text-indigo-300 hidden"></span>
     </div>
 
     <!-- ─────────────────────────────────────────────
@@ -224,7 +251,57 @@
 
     <script>
       const btn = document.getElementById('export-btn');
+      const uploadInput = document.getElementById('upload-input');
+      const uploadArea = document.getElementById('upload-area');
+      const uploadFilename = document.getElementById('upload-filename');
+      const slideContainer = document.getElementById('slide-container');
 
+      /* ── HTML upload handling ── */
+      function loadHtmlFile(file) {
+        if (!file || !file.name.match(/\.html?$/i)) return;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const parser = new DOMParser();
+          const doc = parser.parseFromString(e.target.result, 'text/html');
+
+          // Remove script elements to prevent XSS
+          doc.querySelectorAll('script').forEach(s => s.remove());
+
+          // Copy <style> tags and body content into the slide container
+          const styles = Array.from(doc.querySelectorAll('style'));
+          const bodyContent = doc.body ? doc.body.innerHTML : '';
+
+          slideContainer.innerHTML =
+            styles.map(s => s.outerHTML).join('') + bodyContent;
+
+          uploadFilename.textContent = '📄 ' + file.name;
+          uploadFilename.classList.remove('hidden');
+
+          // Reset so the same file can be re-selected
+          uploadInput.value = '';
+        };
+        reader.readAsText(file);
+      }
+
+      uploadInput.addEventListener('change', () => {
+        loadHtmlFile(uploadInput.files[0]);
+      });
+
+      // Drag-and-drop support
+      uploadArea.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        uploadArea.classList.add('dragover');
+      });
+      uploadArea.addEventListener('dragleave', () => {
+        uploadArea.classList.remove('dragover');
+      });
+      uploadArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        uploadArea.classList.remove('dragover');
+        loadHtmlFile(e.dataTransfer.files[0]);
+      });
+
+      /* ── Export handling ── */
       btn.addEventListener('click', async () => {
         btn.disabled = true;
         btn.innerHTML = '<span class="spinner"></span>正在生成 PPTX…';
