@@ -1,0 +1,9 @@
+{
+  "name": "dom-to-pptx-demo",
+  "version": "1.0.0",
+  "description": "A one-click demo for dom-to-pptx – converts beautiful HTML slides to editable PowerPoint files",
+  "scripts": {
+    "start": "npx --yes serve . -p 3000"
+  },
+  "keywords": ["dom-to-pptx", "html", "powerpoint", "pptx", "demo"]
+}
